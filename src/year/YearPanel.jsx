@@ -19,8 +19,7 @@ function chooseYear(year) {
   this.props.onSelect(value);
 }
 
-export default
-class YearPanel extends React.Component {
+export default class YearPanel extends React.Component {
   constructor(props) {
     super(props);
     this.prefixCls = `${props.rootPrefixCls}-year-panel`;
@@ -65,8 +64,15 @@ class YearPanel extends React.Component {
 
     const yeasEls = years.map((row, index) => {
       const tds = row.map(yearData => {
+        let disabled = false;
+        if (props.disabledDate) {
+          const testValue = value.clone();
+          testValue.year(yearData.value);
+          disabled = props.disabledDate(testValue);
+        }
         const classNameMap = {
           [`${prefixCls}-cell`]: 1,
+          [`${prefixCls}-cell-disabled`]: disabled,
           [`${prefixCls}-selected-cell`]: yearData.year === currentYear,
           [`${prefixCls}-last-decade-cell`]: yearData.year < startYear,
           [`${prefixCls}-next-decade-cell`]: yearData.year > endYear,
@@ -84,17 +90,18 @@ class YearPanel extends React.Component {
             role="gridcell"
             title={yearData.title}
             key={yearData.content}
-            onClick={clickHandler}
+            onClick={disabled ? null : clickHandler}
             className={classnames(classNameMap)}
           >
-            <a
-              className={`${prefixCls}-year`}
-            >
-              {yearData.content}
-            </a>
-          </td>);
+            <a className={`${prefixCls}-year`}>{yearData.content}</a>
+          </td>
+        );
       });
-      return (<tr key={index} role="row">{tds}</tr>);
+      return (
+        <tr key={index} role="row">
+          {tds}
+        </tr>
+      );
     });
 
     return (
@@ -128,13 +135,12 @@ class YearPanel extends React.Component {
           </div>
           <div className={`${prefixCls}-body`}>
             <table className={`${prefixCls}-table`} cellSpacing="0" role="grid">
-              <tbody className={`${prefixCls}-tbody`}>
-              {yeasEls}
-              </tbody>
+              <tbody className={`${prefixCls}-tbody`}>{yeasEls}</tbody>
             </table>
           </div>
         </div>
-      </div>);
+      </div>
+    );
   }
 }
 
@@ -142,9 +148,9 @@ YearPanel.propTypes = {
   rootPrefixCls: PropTypes.string,
   value: PropTypes.object,
   defaultValue: PropTypes.object,
+  disabledDate: PropTypes.func,
 };
 
 YearPanel.defaultProps = {
-  onSelect() {
-  },
+  onSelect() {},
 };
